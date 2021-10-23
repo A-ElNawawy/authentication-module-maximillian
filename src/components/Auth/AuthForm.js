@@ -1,4 +1,5 @@
 import { useState, useRef, useContext } from "react";
+import { useHistory } from "react-router-dom";
 
 import AuthContext from "../../store/auth-context";
 
@@ -9,7 +10,8 @@ const key = "?key=AIzaSyCK85PNPrhoY-xClQPvegbjAwert_pO5v4";
 
 const AuthForm = () => {
   const ctx = useContext(AuthContext);
-  console.log(ctx.token);
+  const history = useHistory();
+
   const [isLogin, setIsLogin] = useState(true);
   const [IsLoading, setIsLoading] = useState(false);
 
@@ -35,7 +37,7 @@ const AuthForm = () => {
     } else {
       url = baseURL + "signUp" + key;
     }
-    console.log(url);
+    //console.log(url);
 
     fetch(url, {
       method: "POST",
@@ -45,7 +47,7 @@ const AuthForm = () => {
         returnSecureToken: true,
       }),
       headers: {
-        "content-type": "application/json",
+        "Content-Type": "application/json",
       },
     })
       .then((res) => {
@@ -62,8 +64,9 @@ const AuthForm = () => {
       })
       .then((res) => {
         res.json().then((data) => {
-          //console.log(data.idToken);
-          ctx.logIn(data.idToken);
+          const expirationTime = new Date().getTime() + +data.expiresIn * 1000;
+          ctx.logIn(data.idToken, expirationTime);
+          history.replace("/");
         });
       })
       .catch((err) => {
